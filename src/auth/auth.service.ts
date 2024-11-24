@@ -12,26 +12,37 @@ export class AuthService {
     private userRepository: UsersRepository,
   ) {}
   async signin(auth: AuthDto) {
-    const { email, password } = auth;
+    try {
+      console.log('entrei?', 'ii');
+      const { email, password } = auth;
 
-    const user = await this.userRepository.findUserByEmail(email);
+      const user = await this.userRepository.findUserByEmail(email);
 
-    if (!user) {
-      throw new RpcException('User credentials not found');
+      if (!user) {
+        throw new RpcException('User credentials not found');
+      }
+
+      const isPassword = await compare(password, user.password);
+
+      if (!isPassword) {
+        throw new RpcException('User credentials not found');
+      }
+
+      const token = this.jwt.sign({
+        sub: user.id,
+      });
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          token_notification: user.token_notification,
+        },
+        access_token: token,
+      };
+    } catch (err) {
+      throw new RpcException(err);
     }
-
-    const isPassword = await compare(password, user.password);
-
-    if (!isPassword) {
-      throw new RpcException('User credentials not found');
-    }
-
-    const token = this.jwt.sign({
-      sub: user.id,
-    });
-
-    return {
-      access_token: token,
-    };
   }
 }

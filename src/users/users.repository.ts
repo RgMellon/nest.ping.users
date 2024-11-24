@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDto } from './dtos/user.dto';
+import { AddTokenDto } from './dtos/addToken.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -16,6 +17,25 @@ export class UsersRepository {
     return await this.prisma.user.findUnique({
       where: {
         email,
+      },
+    });
+  }
+
+  async addNotificationTokenToUser(payload: AddTokenDto) {
+    await this.prisma.user.update({
+      where: {
+        id: payload.id,
+      },
+      data: {
+        token_notification: payload.token,
+      },
+    });
+  }
+
+  async getNotificationToken(token: string) {
+    return await this.prisma.user.findFirst({
+      where: {
+        token_notification: token,
       },
     });
   }

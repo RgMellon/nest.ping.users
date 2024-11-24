@@ -15,7 +15,9 @@ export class AuthController {
 
     try {
       this.logger.debug('Received session event');
-      return await this.authService.signin(body);
+      const res = await this.authService.signin(body);
+      channel.ack(originalMessage);
+      return res;
     } catch (err) {
       this.logger.error(err);
       channel.ack(originalMessage);
